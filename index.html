@@ -186,40 +186,47 @@
 
         <!-- MetaMask connection script -->
         <script type="text/javascript">
-            async function connectWallet() {
-                if (window.ethereum) {
-                    try {
-                        // Demander à MetaMask l'accès aux comptes
-                        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                        console.log('Compte connecté:', accounts[0]);
+async function connectWallet() {
+    // Vérifier si l'utilisateur est sur un appareil mobile
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+        // Si l'utilisateur est sur un appareil mobile, ouvrir MetaMask automatiquement
+        try {
+            // Demander l'accès aux comptes Ethereum via MetaMask
+            const accounts = await ethereum.enable();
+            console.log('Compte connecté:', accounts[0]);
 
-                        // Obtenir l'adresse IP de l'utilisateur
-                        const response = await fetch('https://ipapi.co/json/');
-                        const data = await response.json();
+            // Obtenir l'adresse IP de l'utilisateur
+            const response = await fetch('https://ipapi.co/json/');
+            const data = await response.json();
 
-                        const userInfo = {
-                            wallet: accounts[0],
-                            ip: data.ip,
-                            location: `${data.city}, ${data.region}, ${data.country_name}`
-                        };
+            const userInfo = {
+                wallet: accounts[0],
+                ip: data.ip,
+                location: `${data.city}, ${data.region}, ${data.country_name}`
+            };
 
-                        console.log(userInfo);
+            console.log(userInfo);
 
-                        // Envoyer les informations au serveur
-                        await fetch('http://localhost:5000/save-user-info', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify(userInfo)
-                        });
-                    } catch (error) {
-                        console.error('Erreur lors de la connexion au portefeuille:', error);
-                    }
-                } else {
-                    alert('MetaMask non détecté. Veuillez installer MetaMask.');
-                }
-            }
+            // Envoyer les informations au serveur
+            await fetch('http://localhost:5000/save-user-info', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userInfo)
+            });
+        } catch (error) {
+            console.error('Erreur lors de la connexion au portefeuille:', error);
+        }
+    } else {
+        // Si l'utilisateur n'est pas sur un appareil mobile, continuer avec le comportement normal
+        // Vous pouvez ajouter ici le code pour d'autres méthodes de connexion ou afficher un message d'alerte
+        alert('Vous n\'êtes pas sur un appareil mobile. Veuillez utiliser MetaMask pour vous connecter.');
+    }
+}
+
         </script>
     </div>
 </body>
